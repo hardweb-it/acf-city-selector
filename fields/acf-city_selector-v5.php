@@ -157,21 +157,31 @@
 			 */
 
 			function input_admin_head() {
+
 				$url     = $this->settings['url'];
 				$version = $this->settings['version'];
 
 				wp_register_script( 'acf-city-selector-js', "{$url}assets/js/city-selector.js", array( 'acf-input' ), $version );
 				wp_enqueue_script( 'acf-city-selector-js' );
+				if ( isset( $_GET['action'] ) && $_GET['action'] === 'edit' || isset( $_GET['id'] ) || isset( $_GET['user_id'] ) ) {
 
-				if ( isset( $_GET['action'] ) && $_GET['action'] === 'edit' || isset( $_GET['id'] ) ) {
-
+			    					
 					if ( isset( $_GET['id'] ) ) {
 						$post_id = $_GET['id'];
-					} else {
+					}elseif ( isset( $_GET['user_id'] ) ) {
+						$user_id = $_GET['user_id'];
+					}
+					 else {
 						$post_id = get_the_ID();
 					}
-
-					$fields     = get_field_objects( $post_id );
+				//	echo "<script>console.log('USer ID: " .  $post_id . "' );</script>";
+					if ( isset( $_GET['user_id'] ) ) {
+						$fields     = get_field_objects( 'user_' . $user_id );
+						}
+						else {
+							$fields     = get_field_objects( $post_id );
+						}
+//						echo "<script>console.log('Debug Objects: " .  $fields . "' );</script>";
 					$field_name = 'acf_city_selector';
 					if ( is_array( $fields ) && count( $fields ) > 0 ) {
 						foreach( $fields as $field ) {
@@ -181,7 +191,12 @@
 							}
 						}
 					}
-					$post_meta = get_post_meta( $post_id, $field_name, 1 );
+					if ( isset( $_GET['user_id'] ) ) {
+						$post_meta = get_user_meta( $user_id, $field_name, 1 );
+					}
+					else {
+						$post_meta = get_post_meta( $post_id, $field_name, 1 );
+					}
 
 					if ( ! empty( $post_meta['cityName'] ) ) {
 						wp_localize_script( 'acf-city-selector-js', 'city_selector_vars', array(
@@ -190,10 +205,30 @@
 							'cityName'    => $post_meta['cityName'],
 						) );
 					}
+                    
 				}
-
+				if ( current_user_can('edit_user',get_current_user_id()) ) {
+					$user_id = get_current_user_id();
+					$fields     = get_field_objects( 'user_' . $user_id );
+					$field_name = 'acf_city_selector';
+					if ( is_array( $fields ) && count( $fields ) > 0 ) {
+						foreach( $fields as $field ) {
+							if ( isset( $field['type' ] ) && $field['type'] == 'acf_city_selector' ) {
+								$field_name = $field['name'];
+								break;
+							}
+						}
+					}
+						$post_meta = get_user_meta( $user_id, $field_name, 1 );
+						if ( ! empty( $post_meta['cityName'] ) ) {
+							wp_localize_script( 'acf-city-selector-js', 'city_selector_vars', array(
+								'countryCode' => $post_meta['countryCode'],
+								'stateCode'   => $post_meta['stateCode'],
+								'cityName'    => $post_meta['cityName'],
+							) );
+						}
+				}
 			}
-
 			/*
 			 * load_value()
 			 *
