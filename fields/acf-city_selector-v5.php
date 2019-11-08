@@ -208,7 +208,6 @@
                     
 				}
 				if ( current_user_can('edit_user',get_current_user_id()) ) {
-					$user_id = get_current_user_id();
 					$fields     = get_field_objects( 'user_' . $user_id );
 					$field_name = 'acf_city_selector';
 					if ( is_array( $fields ) && count( $fields ) > 0 ) {
