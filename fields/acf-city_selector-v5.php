@@ -163,9 +163,9 @@
 
 				wp_register_script( 'acf-city-selector-js', "{$url}assets/js/city-selector.js", array( 'acf-input' ), $version );
 				wp_enqueue_script( 'acf-city-selector-js' );
+				$user_id = false;
 				if ( isset( $_GET['action'] ) && $_GET['action'] === 'edit' || isset( $_GET['id'] ) || isset( $_GET['user_id'] ) ) {
-
-			    					
+			
 					if ( isset( $_GET['id'] ) ) {
 						$post_id = $_GET['id'];
 					}elseif ( isset( $_GET['user_id'] ) ) {
@@ -208,7 +208,7 @@
                     
 				}
 				if ( current_user_can('edit_user',get_current_user_id()) ) {
-					$fields     = get_field_objects( 'user_' . $user_id );
+					$fields = get_field_objects( 'user_' . $user_id );
 					$field_name = 'acf_city_selector';
 					if ( is_array( $fields ) && count( $fields ) > 0 ) {
 						foreach( $fields as $field ) {
