@@ -191,7 +191,7 @@
 
 					/* SOME DEBUG INFO */
 					if ( defined('WP_DEBUG') && true === WP_DEBUG) {
-						echo "<script>console.log('User or Post ID: " .  $user_or_post_id . "' );console.log('Debug Objects: " .  $fields . "' );</script>";
+						echo "<script>console.log('User or Post ID: " .  $user_or_post_id . "' );console.log('Debug Objects: " .  json_encode($fields) . "' );</script>";
 					}					
 
 					$field_name = 'acf_city_selector';
