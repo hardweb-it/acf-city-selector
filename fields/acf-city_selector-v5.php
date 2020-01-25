@@ -163,25 +163,37 @@
 
 				wp_register_script( 'acf-city-selector-js', "{$url}assets/js/city-selector.js", array( 'acf-input' ), $version );
 				wp_enqueue_script( 'acf-city-selector-js' );
+				$user_or_post_id = false;
+				
+				//check the GET
 				if ( isset( $_GET['action'] ) && $_GET['action'] === 'edit' || isset( $_GET['id'] ) || isset( $_GET['user_id'] ) ) {
-
-			    					
+		
+					//check and detect the id
 					if ( isset( $_GET['id'] ) ) {
-						$post_id = $_GET['id'];
-					}elseif ( isset( $_GET['user_id'] ) ) {
-						$user_id = $_GET['user_id'];
+						$user_or_post_id = $_GET['id'];
+					} elseif ( isset( $_GET['user_id'] ) ) {
+						$user_or_post_id = $_GET['user_id'];
+					} else {
+						$user_or_post_id = get_the_ID();
 					}
-					 else {
-						$post_id = get_the_ID();
-					}
-				//	echo "<script>console.log('USer ID: " .  $post_id . "' );</script>";
+					
+				} elseif ( basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']) == 'profile.php') {
+					$user_or_post_id = get_current_user_id();
+				}
+				
+				if ($user_or_post_id != false) {
+					
 					if ( isset( $_GET['user_id'] ) ) {
-						$fields     = get_field_objects( 'user_' . $user_id );
-						}
-						else {
-							$fields     = get_field_objects( $post_id );
-						}
-//						echo "<script>console.log('Debug Objects: " .  $fields . "' );</script>";
+						$fields = get_field_objects( 'user_' . $user_or_post_id );
+					} else {
+						$fields = get_field_objects( $user_or_post_id );
+					}
+
+					/* SOME DEBUG INFO */
+					if ( defined('WP_DEBUG') && true === WP_DEBUG) {
+						echo "<script>console.log('User or Post ID: " .  $user_or_post_id . "' );console.log('Debug Objects: " .  $fields . "' );</script>";
+					}					
+
 					$field_name = 'acf_city_selector';
 					if ( is_array( $fields ) && count( $fields ) > 0 ) {
 						foreach( $fields as $field ) {
@@ -192,13 +204,12 @@
 						}
 					}
 					if ( isset( $_GET['user_id'] ) ) {
-						$post_meta = get_user_meta( $user_id, $field_name, 1 );
-					}
-					else {
-						$post_meta = get_post_meta( $post_id, $field_name, 1 );
+						$post_meta = get_user_meta( $user_or_post_id, $field_name, 1 );
+					} else {
+						$post_meta = get_post_meta( $user_or_post_id, $field_name, 1 );
 					}
 
-					if ( ! empty( $post_meta['cityName'] ) ) {
+					if ( !empty( $post_meta['cityName'] ) ) {
 						wp_localize_script( 'acf-city-selector-js', 'city_selector_vars', array(
 							'countryCode' => $post_meta['countryCode'],
 							'stateCode'   => $post_meta['stateCode'],
@@ -207,8 +218,9 @@
 					}
                     
 				}
-				if ( current_user_can('edit_user',get_current_user_id()) ) {
-					$fields     = get_field_objects( 'user_' . $user_id );
+				
+				if ( current_user_can('edit_user', get_current_user_id()) ) {
+					$fields = get_field_objects( 'user_' . $user_or_post_id );
 					$field_name = 'acf_city_selector';
 					if ( is_array( $fields ) && count( $fields ) > 0 ) {
 						foreach( $fields as $field ) {
@@ -218,7 +230,7 @@
 							}
 						}
 					}
-						$post_meta = get_user_meta( $user_id, $field_name, 1 );
+						$post_meta = get_user_meta( $user_or_post_id, $field_name, 1 );
 						if ( ! empty( $post_meta['cityName'] ) ) {
 							wp_localize_script( 'acf-city-selector-js', 'city_selector_vars', array(
 								'countryCode' => $post_meta['countryCode'],
